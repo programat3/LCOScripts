@@ -1,0 +1,134 @@
+severity = data.series[0].fields[2].values;
+code = data.series[0].fields[0].values;
+message = data.series[0].fields[1].values;
+subsystem = data.series[0].fields[3].values;
+ts = data.series[0].fields[4].values;
+selected_severity = ''
+
+allSubsystems = subsystem.filter(function (v, i, self) {
+        return i == self.indexOf(v);
+    });
+
+timeStamp = ts.map(function (value, index){
+  timeFormatted = (new Date(value)).toUTCString()
+  return timeFormatted
+});
+
+
+var valuesAll = [code,
+          message,
+          severity,
+          subsystem,
+          timeStamp            
+          ];
+
+
+var tableAll = {
+  type: 'table',
+  visible: 'true',
+  header: {
+    values: [["<b>Code</b>"], ["<b>Message</b>"],
+				 ["<b>Severity</b>"], ["<b>Subsystem</b>"], ["<b>ts</b>"]],
+    align: "center",
+    line: {width: 1, color: 'black'},
+    fill: {color: "grey"},
+    font: {family: "Arial", size: 12, color: "white"}
+  },
+  cells: {
+    values: valuesAll,
+    align: "center",
+    fill: {
+      color: [getColor(severity)]
+    },
+    line: {color: "black", width: 1},
+     font: {family: "Arial", size: 11, color: ["black"]}
+  },
+  customdata: '',
+}
+
+function getColor(arr) 
+{  var colors = arr.map(function(val, index){
+    var color = '';
+    switch(val){
+      case 'info':
+        color = 'skyblue';
+        break;
+      case 'warning':
+        color = 'orange';
+        break;
+      case 'error':
+        color = 'red';
+        break;
+      default:
+        color = 'white';
+        break;
+    }
+    return color
+  })
+  return colors
+}
+
+function getSpecificSubsystem(arr, subsystemV){
+  console.log(selected_severity)
+  vals = arr.map(function (val, index){
+    if(subsystem[index].includes(subsystemV)){
+      return val
+    }
+  });
+  return vals.filter(function( element ) {
+   return element !== undefined;
+  });
+}
+
+
+function generateData(subsystemV){ 
+    codeS = getSpecificSubsystem(code, subsystemV)
+    messageS = getSpecificSubsystem(message, subsystemV)
+    severityS = getSpecificSubsystem(severity, subsystemV) 
+    subsystemS = getSpecificSubsystem(subsystem, subsystemV)
+    timeStampS = getSpecificSubsystem(timeStamp, subsystemV)
+
+    valuesS = [codeS, messageS, severityS, subsystemS, timeStampS]
+    
+    cells = {
+        values: valuesS,
+        align: "center",
+        fill: {
+          color: [getColor(severityS)]
+        },
+        line: {color: "black", width: 1},
+        font: {family: "Arial", size: 11, color: ["black"]}
+      }
+    customdata = selected_severity
+    return [cells,customdata]
+
+}
+
+function getButtons(arr){
+  var buttons = []
+  for(var i = 0; i < arr.length;  i++){
+    button = {
+      method: 'update',
+      args: [{'cells': generateData(arr[i])[0]}],
+      label: arr[i]
+    }
+    buttons.push(button)
+  }
+  return buttons
+}
+
+updatemenus = [ {
+        yanchor: 'bottom',
+        buttons: getButtons(allSubsystems)
+    },
+    ]
+
+layoutTable = {
+  updatemenus : updatemenus,
+
+}
+
+var data = [tableAll];
+
+
+return{data: data, layout: layoutTable}
