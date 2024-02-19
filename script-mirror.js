@@ -1,7 +1,5 @@
 // Normalize values so they math room temperature
-var airTemp = variables.temperature.current.value/1000
-//Round values of X and Y for a better heatmap
-
+var airTemp = variables.temperature.current.value
 
 //Median Vals
 function median(values){
@@ -40,25 +38,9 @@ function round(arr){
 return new_arr
 };
 
-function all_vals_layer1(arr){
+function all_vals_layer(arr, layerV){
   return arr.map(function(val,index){
-    if (layer[index] == 1){
-      return val
-    }
-  })
-};
-
-function all_vals_layer2(arr){
-  return arr.map(function(val,index){
-    if (layer[index] == 2){
-      return val
-    }
-  })
-};
-
-function all_vals_layer3(arr){
-  return arr.map(function(val,index){
-    if (layer[index] == 3){
+    if (layer[index] == layerV){
       return val
     }
   })
@@ -70,26 +52,26 @@ let layer = data.series[0].fields[3].values;
 let temps = data.series[0].fields[4].values;
 let ids = data.series[0].fields[0].values;
 
-let z1a = all_vals_layer1(temps);
-const x1 = all_vals_layer1(x);
-const y1 = all_vals_layer1(y);
+let z1a = all_vals_layer(temps,1);
+const x1 = all_vals_layer(x,1);
+const y1 = all_vals_layer(y,1);
 let z1r = z1a.map(function(val, index){
   return val-airTemp});
-let labels1 = all_vals_layer1(ids);
+let labels1 = all_vals_layer(ids, 1);
 
-let x2 = all_vals_layer2(x);
-let y2 =all_vals_layer2(y);
-let z2a = all_vals_layer2(temps);
+let x2 = all_vals_layer(x,2);
+let y2 =all_vals_layer(y,2);
+let z2a = all_vals_layer(temps,2);
 let z2r = z2a.map(function(val, index){
   return val-airTemp});
-let labels2 = all_vals_layer2(ids);
+let labels2 = all_vals_layer(ids,2);
 
-let x3 = all_vals_layer3(x);
-let y3 =all_vals_layer3(y);
-let z3a = all_vals_layer3(temps);
+let x3 = all_vals_layer(x,3);
+let y3 =all_vals_layer(y,3);
+let z3a = all_vals_layer(temps,3);
 let z3r = z3a.map(function(val, index){
   return val-airTemp});
-let labels3 = all_vals_layer3(ids);
+let labels3 = all_vals_layer(ids,3);
 
 //Obtain Max and Min for Absolute Plots
 var all_z = z1a.concat(z2a,z3a);
@@ -471,11 +453,38 @@ var heatmap3R = {
   contours: contoursR
 };
 
+//Get Shapes
+function getShapes(){
+  var all_shapes = []
+  for(let i = 0; i < 6; i++){
+    xref = 'x' + (i+1)
+    yref = 'y' + (i+1)
+    console.log(xref)
+    dict_shape = 
+    {
+      xref: xref,
+      yref: yref,
+      xsizemode:'scale',
+      ysizemode:'scale',
+      type: 'path',
+      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
+      fillcolor: 'white',
+      line: {
+        color: 'white',
+        width: 0
+      }
+    }
+    all_shapes.push(dict_shape)
+  }
+  return all_shapes;
+}
+
+
 //Layout
 var layout_circle ={
   annotations: annotations,
-  width: '1110',
-  height: '800',
+  width: '1100',
+  height: '750',
   xaxis: {
     type: 'numeric'
   },
@@ -484,6 +493,12 @@ var layout_circle ={
     cmin: min,
     cmax: max,
     showscale: true,
+    colorbar:{
+      len: 0.5,
+      y: 0.15,
+      yanchor: 'middle',
+      yref: 'paper'
+    }
   },
   coloraxisR: {
     colorscale: 'RdBu',
@@ -495,86 +510,7 @@ var layout_circle ={
       yref: 'paper'
     }
   },
-  shapes:[
-    {
-      xref: 'x1',
-      yref: 'y1',
-      xsizemode:'scale',
-      ysizemode:'scale',
-      type: 'path',
-      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
-      fillcolor: 'white',
-      line: {
-        color: 'white',
-        width: 0
-      }
-    },
-    {
-      xref: 'x2',
-      yref: 'y2',
-      xsizemode:'scale',
-      ysizemode:'scale',
-      type: 'path',
-      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
-      fillcolor: 'white',
-      line: {
-        color: 'white',
-        width: 0
-      }
-    },
-    {
-      xref: 'x3',
-      yref: 'y3',
-      xsizemode:'scale',
-      ysizemode:'scale',
-      type: 'path',
-      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
-      fillcolor: 'white',
-      line: {
-        color: 'white',
-        width: 0
-      }
-    } ,
-    {
-      xref: 'x4',
-      yref: 'y4',
-      xsizemode:'scale',
-      ysizemode:'scale',
-      type: 'path',
-      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
-      fillcolor: 'white',
-      line: {
-        color: 'white',
-        width: 0
-      }
-    },
-    {
-      xref: 'x5',
-      yref: 'y5',
-      xsizemode:'scale',
-      ysizemode:'scale',
-      type: 'path',
-      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
-      fillcolor: 'white',
-      line: {
-        color: 'white',
-        width: 0
-      }
-    } ,
-    {
-      xref: 'x6',
-      yref: 'y6',
-      xsizemode:'scale',
-      ysizemode:'scale',
-      type: 'path',
-      path: 'M 5.779 0.0844 C 5.779 3.5854 3.1458 6.4234 -0.1025 6.4234 C -3.3507 6.4234 -5.9839 3.5854 -5.9839 0.0844 C -5.9839 -3.4165 -3.3507 -6.2546 -0.1025 -6.2546 C 3.1458 -6.2546 5.779 -3.4165 5.779 0.0844 C 5.779 0.0844 5.779 0.0844 5.779 0.0844 M -9.4279 -9.315 L 9.315 -9.315 L 9.315 9.315 L -9.4279 9.315 L -9.4279 -9.315',
-      fillcolor: 'white',
-      line: {
-        color: 'white',
-        width: 0
-      }
-    } 
-  ],
+  shapes: getShapes(),
   grid :{
     rows: 2,
     columns: 3,
@@ -582,8 +518,10 @@ var layout_circle ={
   }
 }
 
+var data = [sensors1,sensors1A, heatmap1A, heatmap1R, sensors2,sensors2A,heatmap2A, heatmap2R, sensors3,sensors3A, heatmap3A, heatmap3R];
+
 config = {
   modeBarButtonsToRemove : ['zoom2d','pan2d','lasso2d','zoomIn2d','zoomOut2d','autoScale2d','resetScale2d','select2d']
 }
-var data = [sensors1,sensors1A, heatmap1A, heatmap1R, sensors2,sensors2A,heatmap2A, heatmap2R, sensors3,sensors3A, heatmap3A, heatmap3R];
+
 return{data: data, layout: layout_circle, config: config}
