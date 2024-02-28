@@ -41,7 +41,7 @@ var tableAll = {
     align: "center",
     line: {width: 1, color: 'black'},
     fill: {color: "grey"},
-    font: {family: "Arial", size: 12, color: "white"}
+    font: {family: "Arial", size: 20, color: "white"}
   },
   cells: {
     values: valuesAll,
@@ -50,7 +50,8 @@ var tableAll = {
       color: [getColor(severity)]
     },
     line: {color: "black", width: 1},
-     font: {family: "Arial", size: 11, color: ["black"]}
+     font: {family: "Arial", size: 14, color: ["black"]},
+     height: 30
   },
   customdata: '',
 }
@@ -105,7 +106,8 @@ function generateData(subsystemV){
           color: [getColor(severityS)]
         },
         line: {color: "black", width: 1},
-        font: {family: "Arial", size: 11, color: ["black"]}
+        font: {family: "Arial", size: 14, color: ["black"]},
+        height: 30
       }
     customdata = selected_severity
     return [cells,customdata]
