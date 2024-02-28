@@ -1,19 +1,23 @@
-severity = data.series[0].fields[2].values;
-code = data.series[0].fields[0].values;
-message = data.series[0].fields[1].values;
-subsystem = data.series[0].fields[3].values;
-ts = data.series[0].fields[4].values;
-selected_severity = ''
+if(data.series[0].fields.length > 1){
+  severity = data.series[0].fields[2].values;
+  code = data.series[0].fields[0].values;
+  message = data.series[0].fields[1].values;
+  subsystem = data.series[0].fields[3].values;
+  ts = data.series[0].fields[4].values;
+}
 
-allSubsystems = subsystem.filter(function (v, i, self) {
-        return i == self.indexOf(v);
-    });
+else{
+  severity = ['No Data']
+  code = ['No Data'];
+  message = ['No Data'];
+  subsystem = ['No Data'];
+  ts = ['No Data'];
+}
 
 timeStamp = ts.map(function (value, index){
   timeFormatted = (new Date(value)).toUTCString()
   return timeFormatted
 });
-
 
 var valuesAll = [code,
           message,
@@ -21,7 +25,12 @@ var valuesAll = [code,
           subsystem,
           timeStamp            
           ];
+selected_severity = ''
 
+
+allSubsystems = subsystem.filter(function (v, i, self) {
+        return i == self.indexOf(v);
+    });
 
 var tableAll = {
   type: 'table',
@@ -69,7 +78,6 @@ function getColor(arr)
 }
 
 function getSpecificSubsystem(arr, subsystemV){
-  console.log(selected_severity)
   vals = arr.map(function (val, index){
     if(subsystem[index].includes(subsystemV)){
       return val
