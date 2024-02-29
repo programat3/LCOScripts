@@ -4,6 +4,7 @@ if(data.series[0].fields.length > 1){
   message = data.series[0].fields[1].values;
   subsystem = data.series[0].fields[3].values;
   ts = data.series[0].fields[4].values;
+  allSubsystems = data.series[1].fields[0].values;
 }
 
 else{
@@ -28,10 +29,6 @@ var valuesAll = [code,
 selected_severity = ''
 
 
-allSubsystems = subsystem.filter(function (v, i, self) {
-        return i == self.indexOf(v);
-    });
-
 var tableAll = {
   type: 'table',
   visible: 'true',
@@ -51,9 +48,9 @@ var tableAll = {
     },
     line: {color: "black", width: 1},
      font: {family: "Arial", size: 14, color: ["black"]},
-     height: 30
+    height: 30
   },
-  customdata: '',
+
 }
 
 function getColor(arr) 
@@ -80,13 +77,23 @@ function getColor(arr)
 
 function getSpecificSubsystem(arr, subsystemV){
   vals = arr.map(function (val, index){
-    if(subsystem[index].includes(subsystemV)){
+    if(subsystemV == ''){
+      return val
+    }
+    else if(subsystem[index].includes(subsystemV)){
       return val
     }
   });
-  return vals.filter(function( element ) {
+  final_vals = vals.filter(function( element ) {
    return element !== undefined;
   });
+
+  if(final_vals.length > 0){
+    return(final_vals)
+  }
+  else{
+    return(['No Data'])
+  }
 }
 
 
@@ -117,10 +124,16 @@ function generateData(subsystemV){
 function getButtons(arr){
   var buttons = []
   for(var i = 0; i < arr.length;  i++){
+    if (arr[i] == ''){
+      label = 'All'
+    }
+    else{
+      label = arr[i]
+    }
     button = {
       method: 'update',
       args: [{'cells': generateData(arr[i])[0]}],
-      label: arr[i]
+      label: label
     }
     buttons.push(button)
   }
